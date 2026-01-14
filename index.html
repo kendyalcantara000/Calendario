@@ -6,22 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-:root {
-  --bg: #f4f6f8;
-  --card: #ffffff;
-  --text: #000000;
-}
-
-.dark {
-  --bg: #121212;
-  --card: #1e1e1e;
-  --text: #ffffff;
-}
-
 body {
-  background: var(--bg);
-  color: var(--text);
   font-family: Arial, sans-serif;
+  background: #f4f6f8;
   margin: 0;
   padding: 15px;
 }
@@ -30,23 +17,10 @@ h1 {
   text-align: center;
 }
 
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-}
-
-button {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
 .day {
-  background: var(--card);
-  padding: 15px;
+  background: #ffffff;
   border-radius: 12px;
+  padding: 15px;
   margin-bottom: 15px;
 }
 
@@ -66,118 +40,47 @@ button {
   opacity: 0.6;
 }
 
-.delete {
-  background: #e03131;
-  color: #fff;
-  margin-left: 8px;
+.add-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 6px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="top-bar">
-  <button onclick="toggleDark()">🌙 / ☀️</button>
-  <button onclick="addTask()">➕ Agregar</button>
-</div>
-
 <h1>📅 Mi Calendario</h1>
-
 <div id="calendar"></div>
 
 <script>
-const baseData = {
+const base = {
   "Lunes": [
-    {time:"9:00 - 12:00", text:"🏋️ Gimnasio", done:false},
-    {time:"1:00 - 2:00", text:"🗣️ Inglés", done:false},
-    {time:"2:00 - 4:30", text:"🎓 UNICARIBE", done:false},
-    {time:"6:00 - 8:00", text:"📘 Español I", done:false},
-    {time:"8:00 - 10:00", text:"📐 Razonamiento Lógico", done:false},
-    {time:"11:00", text:"😴 Dormir", done:false}
+    "9:00 - 12:00 🏋️ Gimnasio",
+    "1:00 - 2:00 🗣️ Inglés",
+    "2:00 - 4:30 🎓 UNICARIBE",
+    "6:00 - 8:00 📘 Español I",
+    "8:00 - 10:00 📐 Razonamiento Lógico",
+    "11:00 😴 Dormir"
   ],
   "Martes": [
-    {time:"9:00 - 12:00", text:"🏋️ Gimnasio", done:false},
-    {time:"1:00 - 2:00", text:"🗣️ Inglés", done:false},
-    {time:"2:00 - 4:30", text:"🎓 UNICARIBE", done:false},
-    {time:"6:00 - 8:00", text:"🧪 Lab CAM-112", done:false},
-    {time:"8:00 - 10:00", text:"📊 Precálculo", done:false},
-    {time:"11:00", text:"😴 Dormir", done:false}
+    "9:00 - 12:00 🏋️ Gimnasio",
+    "1:00 - 2:00 🗣️ Inglés",
+    "2:00 - 4:30 🎓 UNICARIBE",
+    "6:00 - 8:00 🧪 Lab CAM-112",
+    "8:00 - 10:00 📊 Precálculo",
+    "11:00 😴 Dormir"
   ],
   "Miércoles": [
-    {time:"9:00 - 12:00", text:"🏋️ Gimnasio", done:false},
-    {time:"1:00 - 2:00", text:"🗣️ Inglés", done:false},
-    {time:"2:00 - 4:30", text:"🎓 UNICARIBE", done:false},
-    {time:"5:00 - 6:00", text:"🧭 Orientación Profesional", done:false},
-    {time:"6:00 - 8:00", text:"📘 Español I", done:false},
-    {time:"8:00 - 10:00", text:"📐 Razonamiento Lógico", done:false},
-    {time:"11:00", text:"😴 Dormir", done:false}
+    "9:00 - 12:00 🏋️ Gimnasio",
+    "1:00 - 2:00 🗣️ Inglés",
+    "2:00 - 4:30 🎓 UNICARIBE",
+    "5:00 - 6:00 🧭 Orientación Profesional",
+    "6:00 - 8:00 📘 Español I",
+    "8:00 - 10:00 📐 Razonamiento Lógico",
+    "11:00 😴 Dormir"
   ],
   "Jueves": [
-    {time:"9:00 - 12:00", text:"🏋️ Gimnasio", done:false},
-    {time:"1:00 - 2:00", text:"🗣️ Inglés", done:false},
-    {time:"2:00 - 4:30", text:"🎓 UNICARIBE", done:false},
-    {time:"7:00 - 10:00", text:"📊 Precálculo", done:false},
-    {time:"11:00", text:"😴 Dormir", done:false}
-  ],
-  "Viernes": [
-    {time:"9:00 - 12:00", text:"🏋️ Gimnasio", done:false},
-    {time:"1:00 - 2:00", text:"🗣️ Inglés", done:false},
-    {time:"2:00 - 4:30", text:"🎓 UNICARIBE", done:false},
-    {time:"6:00 - 9:00", text:"🌍 Cambio Climático", done:false},
-    {time:"11:00", text:"😴 Dormir", done:false}
-  ]
-};
-
-let data = JSON.parse(localStorage.getItem("calendar")) || structuredClone(baseData);
-
-function save(){ localStorage.setItem("calendar", JSON.stringify(data)); }
-
-function toggleDark(){
-  document.body.classList.toggle("dark");
-  localStorage.setItem("dark", document.body.classList.contains("dark"));
-}
-
-if(localStorage.getItem("dark")==="true"){
-  document.body.classList.add("dark");
-}
-
-function render(){
-  const cal=document.getElementById("calendar");
-  cal.innerHTML="";
-  Object.keys(data).forEach(day=>{
-    const box=document.createElement("div");
-    box.className="day";
-    box.innerHTML=`<h2>${day}</h2>`;
-    data[day].forEach((t,i)=>{
-      const row=document.createElement("div");
-      row.className="task"+(t.done?" done":"");
-      row.innerHTML=`
-        <input type="checkbox" ${t.done?"checked":""} onchange="toggleDone('${day}',${i})">
-        <span>${t.time} – ${t.text}</span>
-        <button class="delete" onclick="removeTask('${day}',${i})">✕</button>
-      `;
-      box.appendChild(row);
-    });
-    cal.appendChild(box);
-  });
-  save();
-}
-
-function toggleDone(d,i){ data[d][i].done=!data[d][i].done; render(); }
-function removeTask(d,i){ data[d].splice(i,1); render(); }
-
-function addTask(){
-  const d=prompt("Día:");
-  const t=prompt("Hora:");
-  const txt=prompt("Actividad:");
-  if(!d||!t||!txt) return;
-  if(!data[d]) data[d]=[];
-  data[d].push({time:t,text:txt,done:false});
-  render();
-}
-
-render();
-</script>
-
-</body>
-</html>
+    "9:00 - 12:00 🏋️ Gimnasio",
+    "1:00 - 2:00 🗣️ Inglés",
+    "2:00 - 4:30 🎓 U
