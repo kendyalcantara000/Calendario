@@ -1,68 +1,130 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Mi Calendario</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+const base = {
+  Lunes: [
+    "9:00 - 12:00 🏋️ Gimnasio",
+    "1:00 - 2:00 🗣️ Inglés",
+    "2:00 - 4:30 🎓 UNICARIBE",
+    "6:00 - 8:00 📘 Español I",
+    "8:00 - 10:00 📐 Razonamiento Lógico",
+    "11:00 😴 Dormir"
+  ],
+  Martes: [
+    "9:00 - 12:00 🏋️ Gimnasio",
+    "1:00 - 2:00 🗣️ Inglés",
+    "2:00 - 4:30 🎓 UNICARIBE",
+    "6:00 - 8:00 🧪 Lab CAM-112",
+    "8:00 - 10:00 📊 Precálculo",
+    "11:00 😴 Dormir"
+  ],
+  Miércoles: [
+    "9:00 - 12:00 🏋️ Gimnasio",
+    "1:00 - 2:00 🗣️ Inglés",
+    "2:00 - 4:30 🎓 UNICARIBE",
+    "5:00 - 6:00 🧭 Orientación Profesional",
+    "6:00 - 8:00 📘 Español I",
+    "8:00 - 10:00 📐 Razonamiento Lógico",
+    "11:00 😴 Dormir"
+  ],
+  Jueves: [
+    "9:00 - 12:00 🏋️ Gimnasio",
+    "1:00 - 2:00 🗣️ Inglés",
+    "2:00 - 4:30 🎓 UNICARIBE",
+    "7:00 - 10:00 📊 Precálculo",
+    "11:00 😴 Dormir"
+  ],
+  Viernes: [
+    "9:00 - 12:00 🏋️ Gimnasio",
+    "1:00 - 2:00 🗣️ Inglés",
+    "2:00 - 4:30 🎓 UNICARIBE",
+    "6:00 - 9:00 🌍 Cambio Climático",
+    "11:00 😴 Dormir"
+  ]
+};
 
-<style>
-:root{
-  --bg:#f4f6f8;
-  --card:#ffffff;
-  --text:#000;
-}
-.dark{
-  --bg:#121212;
-  --card:#1e1e1e;
-  --text:#fff;
-}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial,sans-serif;
-  margin:0;
-  padding:15px;
-}
-h1{text-align:center;}
-.top{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:15px;
-}
-button{
-  padding:6px 10px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-}
-.day{
-  background:var(--card);
-  border-radius:12px;
-  padding:15px;
-  margin-bottom:15px;
-}
-.task{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  margin:6px 0;
-}
-.task span{flex:1;}
-.done span{text-decoration:line-through;opacity:.6;}
-.locked{opacity:.7;}
-</style>
-</head>
+let data = JSON.parse(localStorage.getItem("calendarData"));
+let done = JSON.parse(localStorage.getItem("calendarDone")) || {};
 
-<body>
+if (!data) {
+  data = {};
+  Object.keys(base).forEach(day => {
+    data[day] = base[day].map(t => ({ text: t }));
+  });
+}
 
-<div class="top">
-  <button onclick="toggleDark()">🌙 / ☀️</button>
-  <button onclick="showToday()">📆 HOY</button>
-</div>
+function save() {
+  localStorage.setItem("calendarData", JSON.stringify(data));
+  localStorage.setItem("calendarDone", JSON.stringify(done));
+}
 
-<h1>📅 Mi Calendario</h1>
-<div id="calendar"></div>
+function toggleDark() {
+  document.body.classList.toggle("dark");
+  localStorage.setItem("dark", document.body.classList.contains("dark"));
+}
 
-<script src="app.js"></script>
-</body>
-</html>
+if (localStorage.getItem("dark") === "true") {
+  document.body.classList.add("dark");
+}
+
+function render(filterDay = null) {
+  const cal = document.getElementById("calendar");
+  cal.innerHTML = "";
+
+  Object.keys(data).forEach(day => {
+    if (filterDay && day !== filterDay) return;
+
+    const box = document.createElement("div");
+    box.className = "day";
+    box.innerHTML = `<h2>${day}</h2>`;
+
+    data[day].forEach((task, i) => {
+      const id = `${day}-${i}`;
+      const row = document.createElement("div");
+      row.className = "task" + (done[id] ? " done" : "");
+      row.innerHTML = `
+        <input type="checkbox" ${done[id] ? "checked" : ""} 
+          onchange="done['${id}']=!done['${id}'];save();render()">
+        <span>${task.text}</span>
+        <button onclick="editTask('${day}',${i})">✏️</button>
+        <button onclick="removeTask('${day}',${i})">🗑️</button>
+      `;
+      box.appendChild(row);
+    });
+
+    const addBtn = document.createElement("button");
+    addBtn.textContent = "➕ Agregar actividad";
+    addBtn.onclick = () => addTask(day);
+    box.appendChild(addBtn);
+
+    cal.appendChild(box);
+  });
+}
+
+function addTask(day) {
+  const t = prompt("Nueva actividad:");
+  if (!t) return;
+  data[day].push({ text: t });
+  save();
+  render();
+}
+
+function editTask(day, i) {
+  const t = prompt("Editar actividad:", data[day][i].text);
+  if (!t) return;
+  data[day][i].text = t;
+  save();
+  render();
+}
+
+function removeTask(day, i) {
+  if (!confirm("¿Eliminar esta actividad?")) return;
+  data[day].splice(i, 1);
+  save();
+  render();
+}
+
+function showToday() {
+  const d = new Date().toLocaleDateString("es-ES", { weekday: "long" });
+  const today = d.charAt(0).toUpperCase() + d.slice(1);
+  render(today);
+}
+
+render();
