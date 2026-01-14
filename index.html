@@ -6,166 +6,63 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+:root{
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --text:#000;
+}
+.dark{
+  --bg:#121212;
+  --card:#1e1e1e;
+  --text:#fff;
+}
 body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
   margin:0;
   padding:15px;
 }
 h1{text-align:center;}
-
+.top{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:15px;
+}
+button{
+  padding:6px 10px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
 .day{
-  background:#fff;
+  background:var(--card);
   border-radius:12px;
   padding:15px;
   margin-bottom:15px;
 }
-
 .task{
   display:flex;
   align-items:center;
   gap:6px;
   margin:6px 0;
 }
-
-.task span{
-  flex:1;
-}
-
-.done span{
-  text-decoration:line-through;
-  opacity:0.6;
-}
-
-button{
-  border:none;
-  border-radius:6px;
-  padding:4px 6px;
-  cursor:pointer;
-}
-
-.edit{background:#ffd43b;}
-.delete{background:#ff6b6b;color:#fff;}
-.add{
-  width:100%;
-  margin-top:10px;
-  background:#4dabf7;
-  color:#fff;
-}
+.task span{flex:1;}
+.done span{text-decoration:line-through;opacity:.6;}
+.locked{opacity:.7;}
 </style>
 </head>
 
 <body>
 
+<div class="top">
+  <button onclick="toggleDark()">🌙 / ☀️</button>
+  <button onclick="showToday()">📆 HOY</button>
+</div>
+
 <h1>📅 Mi Calendario</h1>
 <div id="calendar"></div>
 
-<script>
-const baseData = {
-  "Lunes":[
-    "9:00 - 12:00 🏋️ Gimnasio",
-    "1:00 - 2:00 🗣️ Inglés",
-    "2:00 - 4:30 🎓 UNICARIBE",
-    "6:00 - 8:00 📘 Español I",
-    "8:00 - 10:00 📐 Razonamiento Lógico",
-    "11:00 😴 Dormir"
-  ],
-  "Martes":[
-    "9:00 - 12:00 🏋️ Gimnasio",
-    "1:00 - 2:00 🗣️ Inglés",
-    "2:00 - 4:30 🎓 UNICARIBE",
-    "6:00 - 8:00 🧪 Lab CAM-112",
-    "8:00 - 10:00 📊 Precálculo",
-    "11:00 😴 Dormir"
-  ],
-  "Miércoles":[
-    "9:00 - 12:00 🏋️ Gimnasio",
-    "1:00 - 2:00 🗣️ Inglés",
-    "2:00 - 4:30 🎓 UNICARIBE",
-    "5:00 - 6:00 🧭 Orientación Profesional",
-    "6:00 - 8:00 📘 Español I",
-    "8:00 - 10:00 📐 Razonamiento Lógico",
-    "11:00 😴 Dormir"
-  ],
-  "Jueves":[
-    "9:00 - 12:00 🏋️ Gimnasio",
-    "1:00 - 2:00 🗣️ Inglés",
-    "2:00 - 4:30 🎓 UNICARIBE",
-    "7:00 - 10:00 📊 Precálculo",
-    "11:00 😴 Dormir"
-  ],
-  "Viernes":[
-    "9:00 - 12:00 🏋️ Gimnasio",
-    "1:00 - 2:00 🗣️ Inglés",
-    "2:00 - 4:30 🎓 UNICARIBE",
-    "6:00 - 9:00 🌍 Cambio Climático",
-    "11:00 😴 Dormir"
-  ]
-};
-
-let data = JSON.parse(localStorage.getItem("calendarFull")) || structuredClone(baseData);
-let done = JSON.parse(localStorage.getItem("doneFull")) || {};
-
-function save(){
-  localStorage.setItem("calendarFull",JSON.stringify(data));
-  localStorage.setItem("doneFull",JSON.stringify(done));
-}
-
-function toggle(id){
-  done[id]=!done[id];
-  save();render();
-}
-
-function editTask(day,i){
-  const txt = prompt("Editar actividad:",data[day][i]);
-  if(!txt) return;
-  data[day][i]=txt;
-  save();render();
-}
-
-function removeTask(day,i){
-  if(!confirm("¿Eliminar esta actividad?")) return;
-  data[day].splice(i,1);
-  save();render();
-}
-
-function addTask(day){
-  const txt = prompt("Nueva actividad:");
-  if(!txt) return;
-  data[day].push(txt);
-  save();render();
-}
-
-function render(){
-  const cal=document.getElementById("calendar");
-  cal.innerHTML="";
-  Object.keys(data).forEach(day=>{
-    const box=document.createElement("div");
-    box.className="day";
-    box.innerHTML=`<h2>${day}</h2>`;
-    data[day].forEach((t,i)=>{
-      const id=day+"-"+i;
-      const row=document.createElement("div");
-      row.className="task"+(done[id]?" done":"");
-      row.innerHTML=`
-        <input type="checkbox" ${done[id]?"checked":""} onclick="toggle('${id}')">
-        <span>${t}</span>
-        <button class="edit" onclick="editTask('${day}',${i})">✏️</button>
-        <button class="delete" onclick="removeTask('${day}',${i})">🗑️</button>
-      `;
-      box.appendChild(row);
-    });
-    const btn=document.createElement("button");
-    btn.className="add";
-    btn.textContent="➕ Agregar actividad";
-    btn.onclick=()=>addTask(day);
-    box.appendChild(btn);
-    cal.appendChild(box);
-  });
-}
-
-render();
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
