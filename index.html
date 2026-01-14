@@ -86,77 +86,94 @@ button {
 
 <div id="calendar"></div>
 
-<script>
-const days = ["Lunes","Martes","Miércoles","Jueves","Viernes"];
-let data = JSON.parse(localStorage.getItem("calendar")) || {};
+  <script>
+const baseData = {
+  "Lunes": [
+    {time:"9:00 - 12:00", text:"🏋️ Gimnasio", done:false},
+    {time:"1:00 - 2:00", text:"🗣️ Inglés", done:false},
+    {time:"2:00 - 4:30", text:"🎓 UNICARIBE", done:false},
+    {time:"6:00 - 8:00", text:"📘 Español I", done:false},
+    {time:"8:00 - 10:00", text:"📐 Razonamiento Lógico", done:false},
+    {time:"11:00", text:"😴 Dormir", done:false}
+  ],
+  "Martes": [
+    {time:"9:00 - 12:00", text:"🏋️ Gimnasio", done:false},
+    {time:"1:00 - 2:00", text:"🗣️ Inglés", done:false},
+    {time:"2:00 - 4:30", text:"🎓 UNICARIBE", done:false},
+    {time:"6:00 - 8:00", text:"🧪 Lab CAM-112", done:false},
+    {time:"8:00 - 10:00", text:"📊 Precálculo", done:false},
+    {time:"11:00", text:"😴 Dormir", done:false}
+  ],
+  "Miércoles": [
+    {time:"9:00 - 12:00", text:"🏋️ Gimnasio", done:false},
+    {time:"1:00 - 2:00", text:"🗣️ Inglés", done:false},
+    {time:"2:00 - 4:30", text:"🎓 UNICARIBE", done:false},
+    {time:"5:00 - 6:00", text:"🧭 Orientación Profesional", done:false},
+    {time:"6:00 - 8:00", text:"📘 Español I", done:false},
+    {time:"8:00 - 10:00", text:"📐 Razonamiento Lógico", done:false},
+    {time:"11:00", text:"😴 Dormir", done:false}
+  ],
+  "Jueves": [
+    {time:"9:00 - 12:00", text:"🏋️ Gimnasio", done:false},
+    {time:"1:00 - 2:00", text:"🗣️ Inglés", done:false},
+    {time:"2:00 - 4:30", text:"🎓 UNICARIBE", done:false},
+    {time:"7:00 - 10:00", text:"📊 Precálculo", done:false},
+    {time:"11:00", text:"😴 Dormir", done:false}
+  ],
+  "Viernes": [
+    {time:"9:00 - 12:00", text:"🏋️ Gimnasio", done:false},
+    {time:"1:00 - 2:00", text:"🗣️ Inglés", done:false},
+    {time:"2:00 - 4:30", text:"🎓 UNICARIBE", done:false},
+    {time:"6:00 - 9:00", text:"🌍 Cambio Climático", done:false},
+    {time:"11:00", text:"😴 Dormir", done:false}
+  ]
+};
 
-function save() {
-  localStorage.setItem("calendar", JSON.stringify(data));
-}
+let data = JSON.parse(localStorage.getItem("calendar")) || JSON.parse(JSON.stringify(baseData));
 
-function toggleDark() {
-  document.body.classList.toggle("dark");
-  localStorage.setItem("dark", document.body.classList.contains("dark"));
-}
+function save(){ localStorage.setItem("calendar", JSON.stringify(data)); }
 
-if (localStorage.getItem("dark") === "true") {
-  document.body.classList.add("dark");
-}
-
-function render() {
+function render(){
   const cal = document.getElementById("calendar");
   cal.innerHTML = "";
 
-  days.forEach(day => {
-    if (!data[day]) data[day] = [];
-
+  Object.keys(data).forEach(day=>{
     const box = document.createElement("div");
-    box.className = "day";
-    box.innerHTML = `<h2>${day}</h2>`;
+    box.className="day";
+    box.innerHTML=`<h2>${day}</h2>`;
 
-    data[day].forEach((t, i) => {
-      const row = document.createElement("div");
-      row.className = "task" + (t.done ? " done" : "");
-
-      row.innerHTML = `
-        <input type="checkbox" ${t.done ? "checked" : ""} onchange="toggleDone('${day}',${i})">
+    data[day].forEach((t,i)=>{
+      const row=document.createElement("div");
+      row.className="task"+(t.done?" done":"");
+      row.innerHTML=`
+        <input type="checkbox" ${t.done?"checked":""} onchange="toggleDone('${day}',${i})">
         <span>${t.time} – ${t.text}</span>
         <button class="delete" onclick="removeTask('${day}',${i})">✕</button>
       `;
-
       box.appendChild(row);
     });
 
     cal.appendChild(box);
   });
-
   save();
 }
 
-function toggleDone(day, i) {
-  data[day][i].done = !data[day][i].done;
-  render();
-}
+function toggleDone(d,i){ data[d][i].done=!data[d][i].done; render(); }
+function removeTask(d,i){ data[d].splice(i,1); render(); }
 
-function removeTask(day, i) {
-  data[day].splice(i,1);
-  render();
-}
-
-function addTask() {
-  const day = prompt("Día (Lunes, Martes, etc):");
-  const time = prompt("Hora (ej: 2:00 - 3:00):");
-  const text = prompt("Actividad:");
-
-  if (!day || !time || !text) return;
-
-  if (!data[day]) data[day] = [];
-  data[day].push({time, text, done:false});
+function addTask(){
+  const day=prompt("Día:");
+  const time=prompt("Hora:");
+  const text=prompt("Actividad:");
+  if(!day||!time||!text) return;
+  if(!data[day]) data[day]=[];
+  data[day].push({time,text,done:false});
   render();
 }
 
 render();
 </script>
+
 
 </body>
 </html>
